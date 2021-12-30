@@ -1,0 +1,26 @@
+ju main
+
+#include interpreters/machinecode.brbkasm
+
+label main
+    vramadd ' '
+    ; length buffer
+    mov %1, III
+
+    label getinput
+        int %0
+
+        ; control character
+        cmp %0, AAA
+        ; see interpreters/machinecode.brbkasm
+        jeq interpret
+        clearflags
+
+        dwrite %0
+        vramadd %0
+        dpinc
+        inc %1
+        ju getinput
+
+label end
+    halt
