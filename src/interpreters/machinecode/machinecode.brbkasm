@@ -1,0 +1,160 @@
+label interpret
+    ; validates to see if the program occupies full qytes
+
+    ; 9 contains no. of qits in program
+    mov %9, %1
+    mod %9, IOA
+
+    ; if 9 isnt divisible by 3 (i.e. cannot contain full qytes) throw err
+    cmp %9, III
+    jneq segerr
+
+    ; free %9
+    mov %9, III
+
+    vramadd '='
+
+    ; preserves for later use
+    push %1
+
+    ; point to the bottom of the stack
+    dpset %UUUUAEIEAU
+    label uppercase
+        ; if the number of qits left to convert is 0, go to write
+        cmp %1, III
+        jlteq writeqytes
+
+        ; convert everything to uppercase
+        call convert_to_uppercase
+        dec %1
+        ju uppercase
+
+    label writeqytes
+        pop %1
+        
+        mov %9, %1
+
+        ; reset dp
+        dpset %AAAAAAAAAA
+
+        ; stores written instruction
+        mov %8, III
+
+        label writeqyte
+            dec %1
+            mov %2, %1
+
+            ; we might be at the end of the string
+            clearflags
+            cmp %1, III
+            jeq execqytes
+
+            ; stores index to write in %2, ordered as 210
+            mod %2, IOA
+            dec %2
+            not %2
+            inc %2
+
+            clearflags
+            pop %0
+
+            ; A
+            cmp %0, IIO
+            jeq writeA
+            
+            ; E
+            cmp %0, IOI
+            jeq writeE
+
+            ; I
+            cmp %0, IUE
+            jeq writeI
+
+            ; O
+            cmp %0, OIA
+            jeq writeO
+
+            ; U
+            cmp %0, OEO
+            jeq writeU
+
+            ju segerr
+
+            label writeA
+                mov %5, IIA
+                ju writeQ
+
+            label writeE
+                mov %5, IIE
+                ju writeQ
+
+            label writeI
+                mov %5, III
+                ju writeQ
+
+            label writeO
+                mov %5, IIO
+                ju writeQ
+
+            label writeU
+                mov %5, IIU
+                ju writeQ
+
+            label writeQ
+                mov %3, %5
+                rotate %3, %2
+                add %8, %3
+
+            clearflags
+            cmp %2, IIU
+            jneq writeqyte
+
+            vramadd '$'
+
+            dwrite %8
+            dpinc
+
+            ju writeqyte
+
+        ju segerr
+
+    label execqytes
+        dpset %AAAAAAAAAA
+
+    label execloop
+        clearflags
+        cmp %9, III
+        jeq end
+
+        drun
+
+        dpinc
+        dec %9
+        ju execloop
+
+    label segerr
+        vramadd ' '
+        vramadd 'S'
+        vramadd 'E'
+        vramadd 'G'
+        vramadd 'E'
+        vramadd 'R'
+        vramadd 'R'
+        halt
+
+subr convert_to_uppercase
+    ; reads the next value from dp
+    dread %0
+
+    ; if greater than 0 (i.e. uppercase), loop
+    cmp %0, III
+    jgt ctu_end
+
+    ; otherwise, mulitply by -1 (make uppercase), rewrite
+    mul %0, IIE
+    dwrite %0
+
+    label ctu_end
+    ; focus on next index
+    dpdec
+    return

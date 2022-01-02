@@ -1,6 +1,6 @@
 ju main
 
-#include interpreters/machinecode.brbkasm
+#include interpreters/machinecode/machinecode.brbkasm
 
 label main
     vramadd ' '
@@ -16,9 +16,9 @@ label main
         jeq interpret
         clearflags
 
-        dwrite %0
+        push %0
         vramadd %0
-        dpinc
+        ; stores length of program in qits
         inc %1
         ju getinput
 
